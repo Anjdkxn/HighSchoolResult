@@ -1,0 +1,293 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>High School Marks Calculator</title>
+  <style>
+    :root{
+      --bg1: #0f172a;
+      --bg2: #071129;
+      --card: rgba(255,255,255,0.06);
+      --accent: linear-gradient(135deg,#7c3aed,#06b6d4);
+      --glass: rgba(255,255,255,0.06);
+      --glass-2: rgba(255,255,255,0.03);
+      --text: #e6eef8;
+      --muted: #9fb3cf;
+      --success: #16a34a;
+      --danger: #ef4444;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    }
+
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      min-height:100vh;
+      background: radial-gradient(1000px 600px at 10% 10%, rgba(124,58,237,0.12), transparent),
+                  radial-gradient(800px 500px at 90% 90%, rgba(6,182,212,0.08), transparent),
+                  linear-gradient(180deg,var(--bg1),var(--bg2));
+      color:var(--text);
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+      padding:32px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:24px;
+      font-size:16px;
+    }
+
+    .container{
+      width:100%;
+      max-width:1100px;
+      display:grid;
+      grid-template-columns: 1fr 420px;
+      gap:28px;
+      align-items:start;
+    }
+
+    /* Left card (form) */
+    .card{
+      background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+      border: 1px solid rgba(255,255,255,0.04);
+      padding:28px;
+      border-radius:16px;
+      box-shadow: 0 6px 30px rgba(2,6,23,0.6);
+      backdrop-filter: blur(6px) saturate(120%);
+    }
+
+    .header{
+      display:flex;
+      gap:12px;
+      align-items:center;
+      margin-bottom:18px;
+    }
+    .logo{
+      width:54px;height:54px;border-radius:12px;
+      background:var(--accent);
+      display:flex;align-items:center;justify-content:center;font-weight:700;font-size:20px;color:white;
+      box-shadow: 0 6px 18px rgba(7,18,41,0.6);
+    }
+    h1{margin:0;font-size:20px}
+    p.lead{margin:0;color:var(--muted);font-size:13px}
+
+    form{display:grid;gap:14px}
+
+    .grid{
+      display:grid;
+      grid-template-columns: repeat(3,1fr);
+      gap:12px;
+    }
+
+    label{display:block;font-size:13px;color:var(--muted);margin-bottom:6px}
+    input[type="number"], input[type="text"]{
+      width:100%;
+      padding:12px 14px;border-radius:10px;border:none;
+      background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+      color:var(--text);
+      outline:2px solid transparent;transition:all .15s ease;
+      box-shadow:inset 0 -6px 12px rgba(2,6,23,0.4);
+      font-size:15px;
+    }
+    input:focus{outline-color:rgba(124,58,237,0.35);transform:translateY(-2px)}
+
+    .full{grid-column:1/-1}
+
+    .controls{display:flex;gap:12px;align-items:center;margin-top:6px}
+    .btn{
+      padding:10px 14px;border-radius:10px;border:none;cursor:pointer;font-weight:600;
+      background:var(--accent);color:white;box-shadow:0 8px 20px rgba(12,10,30,0.4);
+    }
+    .btn.ghost{background:transparent;border:1px solid rgba(255,255,255,0.06);color:var(--text);}
+
+    /* Right summary */
+    .summary{
+      position:relative;padding:22px;border-radius:14px;min-height:240px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+      border:1px solid rgba(255,255,255,0.04);
+    }
+    .summary h3{margin:0 0 6px 0}
+    .metric{display:flex;justify-content:space-between;align-items:center;margin:12px 0;padding:10px;border-radius:10px;background:var(--glass-2)}
+    .metric .big{font-size:22px;font-weight:700}
+    .metric .muted{color:var(--muted);font-size:13px}
+
+    .result-badge{display:inline-block;padding:8px 12px;border-radius:999px;font-weight:700}
+    .pass{background:rgba(22,163,74,0.12);color:var(--success)}
+    .fail{background:rgba(239,68,68,0.08);color:var(--danger)}
+
+    .note{font-size:13px;color:var(--muted);margin-top:8px}
+
+    /* Responsive */
+    @media (max-width:980px){
+      .container{grid-template-columns:1fr;}
+    }
+    @media (max-width:520px){
+      .grid{grid-template-columns:repeat(2,1fr)}
+    }
+
+    footer.small{margin-top:14px;color:var(--muted);font-size:13px}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <section class="card" aria-labelledby="title">
+      <div class="header">
+        <div class="logo">HS</div>
+        <div>
+          <h1 id="title">High School Marks Calculator</h1>
+          <p class="lead">Enter marks (out of max marks) for each subject — calculate total, percentage and grade.</p>
+        </div>
+      </div>
+
+      <form id="marksForm" onsubmit="return false;" autocomplete="off">
+        <div class="grid">
+          <div>
+            <label for="hindi">Hindi (out of 100)</label>
+            <input id="hindi" type="number" min="0" max="100" placeholder="e.g. 78">
+          </div>
+
+          <div>
+            <label for="english">English (out of 100)</label>
+            <input id="english" type="number" min="0" max="100" placeholder="e.g. 84">
+          </div>
+
+          <div>
+            <label for="math">Math (out of 100)</label>
+            <input id="math" type="number" min="0" max="100" placeholder="e.g. 92">
+          </div>
+
+          <div>
+            <label for="science">Science (out of 100)</label>
+            <input id="science" type="number" min="0" max="100" placeholder="e.g. 88">
+          </div>
+
+          <div>
+            <label for="social">Social Science (out of 100)</label>
+            <input id="social" type="number" min="0" max="100" placeholder="e.g. 76">
+          </div>
+
+          <div>
+            <label for="art">Art (out of 100)</label>
+            <input id="art" type="number" min="0" max="100" placeholder="e.g. 81">
+          </div>
+
+          <div class="full">
+            <label for="student">Student Name (optional)</label>
+            <input id="student" type="text" placeholder="e.g. Riya Sharma">
+          </div>
+        </div>
+
+        <div class="controls">
+          <button class="btn" id="calcBtn" type="button">Calculate</button>
+          <button class="btn ghost" id="clearBtn" type="button">Clear</button>
+          <div style="margin-left:auto;color:var(--muted);font-size:13px">Max per subject: <strong>100</strong></div>
+        </div>
+
+        <footer class="small">Tip: you can leave a field blank (treated as 0). Use the Clear button to start over.</footer>
+      </form>
+    </section>
+
+    <aside class="summary card" aria-labelledby="summaryTitle">
+      <h3 id="summaryTitle">Summary</h3>
+
+      <div id="studentName" class="note">No student selected</div>
+
+      <div class="metric">
+        <div>
+          <div class="muted">Total Obtained</div>
+          <div class="big" id="total">0 / 600</div>
+        </div>
+        <div>
+          <div class="muted">Percentage</div>
+          <div class="big" id="percent">0.00%</div>
+        </div>
+      </div>
+
+      <div class="metric">
+        <div>
+          <div class="muted">Result</div>
+          <div id="resultBadge" class="result-badge fail">Not calculated</div>
+        </div>
+        <div>
+          <div class="muted">Grade</div>
+          <div class="big" id="grade">-</div>
+        </div>
+      </div>
+
+      <div id="breakdown" class="note">Enter marks and press <strong>Calculate</strong> to view a subject-by-subject breakdown.</div>
+    </aside>
+  </div>
+
+  <script>
+    // Elements
+    const fields = ['hindi','english','math','science','social','art'];
+    const maxPer = 100;
+    const totalMax = fields.length * maxPer;
+
+    const getVal = id => {
+      const v = parseFloat(document.getElementById(id).value);
+      return Number.isFinite(v) ? Math.max(0, Math.min(maxPer, v)) : 0;
+    }
+
+    function compute(){
+      const values = fields.map(getVal);
+      const student = document.getElementById('student').value.trim();
+      const total = values.reduce((a,b)=>a+b,0);
+      const pct = (total / totalMax) * 100;
+
+      // grade logic (customizable)
+      let grade = 'F';
+      if(pct >= 90) grade = 'A+';
+      else if(pct >= 80) grade = 'A';
+      else if(pct >= 70) grade = 'B+';
+      else if(pct >= 60) grade = 'B';
+      else if(pct >= 50) grade = 'C';
+      else grade = 'F';
+
+      const pass = values.every(v => v >= 33); // pass if >=33 in each subject
+
+      // update UI
+      document.getElementById('total').textContent = total + ' / ' + totalMax;
+      document.getElementById('percent').textContent = pct.toFixed(2) + '%';
+      const badge = document.getElementById('resultBadge');
+      badge.textContent = pass ? 'PASS' : 'FAIL';
+      badge.className = 'result-badge ' + (pass ? 'pass' : 'fail');
+      document.getElementById('grade').textContent = grade;
+      document.getElementById('studentName').textContent = student ? student : 'No student selected';
+
+      // breakdown
+      const breakdown = fields.map((f,i)=>{
+        const label = f.charAt(0).toUpperCase()+f.slice(1).replace(/([A-Z])/g,' $1');
+        return `${label}: ${values[i]} / ${maxPer}`;
+      }).join('\n');
+
+      document.getElementById('breakdown').textContent = breakdown + '\n\nNote: Passing criterion used here is >=33 per subject. Grade scale: A+ (>=90), A (>=80), B+ (>=70), B (>=60), C (>=50), F (<50).';
+
+      // accessibility announce (for screen readers)
+      const live = document.getElementById('ariaLive');
+      if(live){
+        live.textContent = `Calculated: ${total} out of ${totalMax}. Percentage ${pct.toFixed(2)}. Result ${pass ? 'PASS' : 'FAIL'}. Grade ${grade}.`;
+      }
+    }
+
+    document.getElementById('calcBtn').addEventListener('click', compute);
+    document.getElementById('clearBtn').addEventListener('click', ()=>{
+      fields.forEach(f=>document.getElementById(f).value = '');
+      document.getElementById('student').value = '';
+      document.getElementById('total').textContent = '0 / ' + totalMax;
+      document.getElementById('percent').textContent = '0.00%';
+      document.getElementById('grade').textContent = '-';
+      const badge = document.getElementById('resultBadge');
+      badge.textContent = 'Not calculated'; badge.className = 'result-badge fail';
+      document.getElementById('studentName').textContent = 'No student selected';
+      document.getElementById('breakdown').textContent = 'Enter marks and press Calculate to view a subject-by-subject breakdown.';
+    });
+
+    // create an aria-live region for screen readers
+    const live = document.createElement('div');
+    live.id = 'ariaLive'; live.setAttribute('aria-live','polite'); live.style.position='absolute'; live.style.left='-9999px';
+    document.body.appendChild(live);
+  </script>
+</body>
+</html>
