@@ -1,0 +1,2 @@
+# HighSchoolResult
+High school percentage 
